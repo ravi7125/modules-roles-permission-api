@@ -3,14 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Models\job;
 use App\Traits\Listingapi;
 class JobController extends Controller
 {
     use Listingapi;
 
-    public function list()
-    {
+    public function list(Request $request)
+   {
+        $validaiton = Validator::make($request->all(), [
+            'page'    => 'required',
+            'perpage' => 'required',
+            'search'  => 'required',
+       
+        ]);   
+        if ($validaiton->fails())
+            return $validaiton->errors();
         $query = job::query(); // get all modules
         $searchable_fields = ['name']; // fields to search
     
@@ -29,10 +38,13 @@ class JobController extends Controller
     }
     public function add(Request $request)
    {
-        $request->validate([
-            'name'          =>  'required',
-            'description'   =>  'nullable|max:255',
-        ]);
+    $validaiton = Validator::make($request->all(), [
+        "name"          => "required",
+        "description"   => "required|max:255", 
+
+    ]);   
+    if ($validaiton->fails())
+        return $validaiton->errors();
         $job = new job();
         $job->name =$request->name;
         $job->description=$request->description;
@@ -41,31 +53,30 @@ class JobController extends Controller
     }
 
 // show modules
-public function view($id = null){
-    $job = $id ? job::findOrFail($id) : job::all();
+    public function view($id = null){
+        $job = $id ? job::findOrFail($id) : job::all();
 
-    if ($job->isEmpty()) {
-        return 'Data is not available';
+        if ($job->isEmpty()) {
+            return 'Data is not available';
+     }
+        return message($job);
     }
-
-    return message($job);
-}
 
 //modules update 
     public function update(Request $request,$id)
-{
+   {
         $job = job::findOrFail($request->id);
         $job->name=$request->name;
         $job->description=$request->description;
         $job->save();
-        return response()->json([
-        'message' => 'job updated successfully'
-    ]);
-}
+            return response()->json([
+            'message' => 'job updated successfully'
+        ]);
+    }
 //Delete modules data.. 
     function Delete($id){
         $job = job::findOrFail($id);
         $job->delete();     
-        return message('Job data deleted');
+            return message('Job data deleted');
     }
 }

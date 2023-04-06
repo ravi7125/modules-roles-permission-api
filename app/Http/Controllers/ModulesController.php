@@ -10,8 +10,17 @@ class ModulesController extends Controller
 { 
     use Listingapi;
 
-    public function list()
+    public function list(Request $request)
     {
+        $validaiton = Validator::make($request->all(), [
+           'page'    => 'required',
+           'perpage' => 'required',
+           'search'  => 'required',
+       
+        ]);   
+        if ($validaiton->fails())
+            return $validaiton->errors();
+
         $query = Modules::query(); // get all modules
         $searchable_fields = ['name']; // fields to search
     
@@ -30,21 +39,20 @@ class ModulesController extends Controller
     }
     
     public function add(Request $request)
-   {
-        $rules = array(
-             "name"          => "required",
-             "description"   => "required|max:255",    
-    );
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-        return $validator->errors();
-    }
+   {   
+        $validaiton = Validator::make($request->all(), [
+            "name"          => "required",
+            "description"   => "required|max:255", 
+       
+        ]);   
+        if ($validaiton->fails())
+            return $validaiton->errors();
 
         $modules = new Modules();
         $modules->name =$request->name;
         $modules->description=$request->description;
         $modules->save();
-        return message($modules);
+            return message($modules);
     }
 
     public function view($id = null)
@@ -53,23 +61,31 @@ class ModulesController extends Controller
         if ($modules->isEmpty()) {
             return " No Data Found First Create Modules";
         }      
-        return message($modules);
+            return message($modules);
     
     }
 
     public function update(Request $request,$id)
-   {
+   {    
+        $validaiton = Validator::make($request->all(), [
+            "name"          => "required",
+            "description"   => "required|max:255", 
+   
+        ]);   
+        if ($validaiton->fails())
+            return $validaiton->errors();
+        
         $modules = Modules::findOrFail($request->id);
         $modules->name=$request->name;
         $modules->description=$request->description;
         $modules->save();
-             return message('Modules Data Updated Successfully'); 
+            return message('Modules Data Updated Successfully'); 
     }
     
     function Delete($id){
         $modules = Modules::findOrFail($id);
         $modules->delete(); 
-        return message('Modules Data Deleted Successfully'); 
+            return message('Modules Data Deleted Successfully'); 
     }
 
 }

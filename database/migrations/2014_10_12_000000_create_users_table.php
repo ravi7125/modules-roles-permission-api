@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->integer('phone');
             $table->string('password');
+              $table->boolean('is_new')->default(true);
             $table->timestamps();
         });
 
@@ -27,6 +28,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('is_new');
+        });
     }
 };

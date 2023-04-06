@@ -16,4 +16,8 @@ class Modules extends Model
         'description'
     ];
    
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class)->withPivot('add_access', 'delete_access', 'view_access', 'edit_access');
+    }
 }

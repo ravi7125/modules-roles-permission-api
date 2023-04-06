@@ -11,8 +11,18 @@ class RoleController extends Controller
 {
     use Listingapi;
 
-    public function list()
+    public function list(Request $request)
     {
+        $validaiton = Validator::make($request->all(), [
+           'page'    => 'required',
+           'perpage' => 'required',
+           'search'  => 'required',
+           
+       
+        ]);   
+        if ($validaiton->fails())
+            return $validaiton->errors();
+            
         $query = Role::query(); // get all role
         $searchable_fields = ['name']; // fields to search
     

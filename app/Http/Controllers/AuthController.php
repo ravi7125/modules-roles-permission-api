@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\UserRoles;
 
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -23,6 +22,16 @@ class AuthController extends Controller
 {
     public function add(Request $request)
    {
+        
+        $validaiton = Validator::make($request->all(), [
+            "name"      =>  'required',
+            'email'     =>  'required|email|unique:users,email',
+            'phone'     =>  'required|numeric|unique:users,phone',
+            'password'  =>  'required',
+            'roles'     =>  'required|array|exists:roles,id',
+        ]);   
+        if ($validaiton->fails())
+            return $validaiton->errors();
         $user = new User();
         $user->name =$request->name;
         $user->email =$request->email;
@@ -31,16 +40,18 @@ class AuthController extends Controller
         $result=$user->save();
         $token = $user->createToken('Ahg')->plainTextToken;
         $user->roles()->sync($request->input('roles')); 
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-            ],201);
-    if($result){
-        return["user data hase been saved"];
-    }else{
-        return["user data not saved"];     
+            return response()->json(['user' => $user, 'token' => $token ],201);         
+         
+        if($result){
+
+            return["user data hase been saved"];
+
+        }else{
+
+            return["user data not saved"];     
+        }
     }
-    }
+
     public function verifyAccount($token)
     {
         $user = User::where('email_verify_token','=',$token)->first();
@@ -51,9 +62,9 @@ class AuthController extends Controller
                 'email_verified_at'     => Carbon::now(),
                 'is_active'             =>  true,
             ]);
-             return done('Account Verify Successfuly');
+             return message('Account Verify Successfuly');
         }else{
-             return done('Account Already Verified');
+             return message('Account Already Verified');
         }
     }
     public function login(Request $request)
@@ -61,51 +72,18 @@ class AuthController extends Controller
             $request->only('email','password');
 
             if (Auth::attempt(['email'=>$request->email,'password'=>$request->password])){                
-                $user = User::where('email',$request->email)->first();
-                $token = $user->createToken('Token')->plainTextToken;
+            $user = User::where('email',$request->email)->first();
+            $token = $user->createToken('Token')->plainTextToken;
 
-                return response()->json([
-                    'user'  => $user,
-                    'token' => $token
-                ]); 
+            return response()->json([
+                'user'  => $user,
+                'token' => $token
+            ]); 
             }
-            return response()->json([
-                  'message' => 'Invalid data'
-            ], 401);
+            return response()->json(['The email address or password you entered is incorrect.' ], 401);
+         
         }
 
- // Change Password 
-    public function changePassword(Request $request)
-    {
-        $request->validate([
-            'current_password'       => 'required|current_password',
-            'password'               => 'required|min:8',
-            'password_confirmation'  => 'required|same:password',
-        ]);
-        $user = Auth::user();
-        if($user){
-        $user->update([
-            'password'=> Hash::make($request->password),
-        ]);
-            return response()->json([ 
-                'message' => 'Password changed successfully',
-            ]);
-        }
-            return response()->json([
-                'message' => 'Invalid current password',
-            ], 400);
-    }
-
-//logout 
-    public function logout(Request $request)
-        {
-            $request->user()->currentAccessToken()->delete();
-            return response()->json([
-                "message"=>"User successfully logged out",
-            ]);
-            // Auth::logout();
-            return response()->json(['message' => 'Logged out successfully']);
-        }
 
         public function sendResetLinkEmail(Request $request)
         {
@@ -158,7 +136,7 @@ class AuthController extends Controller
                 'email' => $request->email
             ]);
     
-            return "Mail Sent";
+            return "Mail Sent Successfully";
         }
     
         public function forgotPassword(Request $request)

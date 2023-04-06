@@ -33,9 +33,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::controller(AuthController::class)->prefix('auth')->group(function(){
         Route::post("register", 'add');
         Route::post('login', 'login');
-        Route::post('changepassword', 'changepassword')->middleware('auth:sanctum');
+     
         Route::post('password/email', 'sendresetlinkemail')->middleware('auth:sanctum');
-        Route::post('logout', 'logout');
+
         Route::post('/forgotPasswordLink', 'forgotPasswordLink');
         Route::post('/forgotPassword', 'forgotPassword');
 });
@@ -45,15 +45,17 @@ Route::controller(AuthController::class)->prefix('auth')->group(function(){
 */
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::controller(UserController::class)->prefix('user')->group(function () {
-        Route::get ("view/{id?}", 'view');
+        Route::get ("view", 'view');
         Route::delete("delete/{id}", 'Delete');
         Route::put("update/{id}", 'update');
+        Route::post('logout', 'logout');
+        Route::post('changepassword', 'changepassword');
         Route::post("list", 'list');
     });
         //job route
     Route::controller(JobController::class)->prefix('job')->group(function(){
         Route::post("create",'add')->middleware('Webguard:job,add_access');
-        Route::get("view/{id?}",'view')->middleware('Webguard:job,view_access');
+        Route::get("view",'view')->middleware('Webguard:job,view_access');
         Route::put("update",'update')->middleware('Webguard:job,edit_access');
         Route::delete("delete/{id}",'Delete')->middleware('Webguard:job,delete_access');
     });
@@ -61,7 +63,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Employee route
     Route::controller(EmployeeController::class)->prefix('employee')->group(function(){
         Route::post("create",'add')->middleware('Webguard:employee,add_access');
-        Route::get("view/{id?}",'view')->middleware('Webguard:employee,view_access');
+        Route::get("view",'view')->middleware('Webguard:employee,view_access');
         Route::put("update/{id}",'update')->middleware('Webguard:employee,edit_access');
         Route::delete("delete/{id}",'Delete')->middleware('Webguard:employee,delete_access');
 });
@@ -71,7 +73,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::controller(ModulesController::class)->prefix('modules')->group(function(){
         Route::post("list",'list');
         Route::post("create",'add');
-        Route::get("view/{id?}",'view');
+        Route::get("view",'view');
         Route::delete("delete/{id}",'Delete');
         Route::put("update/{id}",'update');
     });
