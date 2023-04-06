@@ -110,7 +110,7 @@ public function update(Request $request, $id)
         $module_permission->save();
     }
 
-    return response()->json(['message' => ' updated successfully']);
+    return response()->json(['message' => 'Data updated successfully']);
 }
 //delete Permission.. 
     function Delete($id){
